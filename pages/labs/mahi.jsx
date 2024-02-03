@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { withIronSession } from "next-iron-session";
 
-const Mahi = ({ user }) => {
+const ProtectedPage = ({ user }) => {
   const [data, setData] = useState({})
     
     const role = user?.user;
@@ -77,4 +77,4 @@ export const getServerSideProps = withIronSession(
     }
 );
 
-export default Mahi;
+export default ProtectedPage;
