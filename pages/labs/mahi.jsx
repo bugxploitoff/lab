@@ -52,7 +52,7 @@ const Mahi = ({ user, data }) => {
   );
 };
 
-export const getStaticProps = withIronSession(
+export const getServerSideProps = withIronSession(
   async ({ req, res }) => {
     try {
       const user = req.session?.get('user');
