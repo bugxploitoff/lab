@@ -51,7 +51,7 @@ const ProtectedPage = ({ user, loading }) => {
   );
 };
 
-export const getServerSideProps = async ({ req, res }) => {
+export const getStaticProps = async ({ req, res }) => {
   const { user, loading } = await authenticateUser({ req, res });
   return { props: { user, loading } };
 };
