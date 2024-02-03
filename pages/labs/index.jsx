@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import TestimonialSlider from "../../components/TestimonialSlider";
 import { fadeIn } from "../../variants";
-import { authenticateUser } from "./authUtils";
+import { authenticateUser } from "../../authUtils";
 
 const ProtectedPage = ({ user, loading }) => {
   if (loading) {
