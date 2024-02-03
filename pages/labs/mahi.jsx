@@ -27,7 +27,7 @@ const ProtectedPage = ({ user, data }) => {
   );
 };
 
-export const getServerSideProps = withIronSession(
+export const getStaticProps = withIronSession(
   async ({ req, res }) => {
     try {
       const user = req.session.get("user");
@@ -57,9 +57,7 @@ export const getServerSideProps = withIronSession(
       };
     } catch (error) {
       console.error("Error fetching user session:", error);
-      res.statusCode = 500;
-      res.end();
-      return { props: {} };
+      return { props: { user: null, data: {} } };
     }
   },
   {
