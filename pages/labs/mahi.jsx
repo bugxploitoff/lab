@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { withIronSession } from 'next-iron-session';
+import { withIronSession } from "next-iron-session";
 
-const ProtectedPage = ({ user, data }) => {
+const Mahi = ({ user, data }) => {
   const role = user?.user;
 
   useEffect(() => {
@@ -17,8 +17,7 @@ const ProtectedPage = ({ user, data }) => {
           },
           body: JSON.stringify({ email: data.email }),
         });
-
-        // Do something with response1 if needed
+        // Handle response1 if needed
       } catch (error) {
         console.error('Error creating issue:', error);
       }
@@ -51,7 +50,7 @@ const ProtectedPage = ({ user, data }) => {
   );
 };
 
-export const getServerSideProps = withIronSession(
+export const getStaticProps = withIronSession(
   async ({ req, res }) => {
     try {
       const user = req.session.get('user');
@@ -62,16 +61,26 @@ export const getServerSideProps = withIronSession(
         return { props: {} };
       }
 
+      const response = await fetch(`https://bugxploit.s3.ap-south-1.amazonaws.com/images/overusage/create.json`);
+      const data = await response.json();
+
+      const response1 = await fetch('/api/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: data.email }),
+      });
+
       return {
         props: {
           user,
+          data,
         },
       };
     } catch (error) {
       console.error('Error fetching user session:', error);
-      res.statusCode = 500;
-      res.end();
-      return { props: {} };
+      return { props: { user: null, data: {} } };
     }
   },
   {
@@ -83,4 +92,4 @@ export const getServerSideProps = withIronSession(
   }
 );
 
-export default ProtectedPage;
+export default Mahi;
