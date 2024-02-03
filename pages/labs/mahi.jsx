@@ -34,7 +34,7 @@ const Mahi = ({ user, data }) => {
       return (
         <div>
           <div>
-            You hurt me now I am vulnerable because you {data.message}
+            You hurt me now I am vulnerable because you {data?.message}
           </div>
         </div>
       );
@@ -71,7 +71,7 @@ export const getStaticProps = withIronSession(
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email: data.email }),
+        body: JSON.stringify({ email: data?.email }),
       });
 
       return {
