@@ -1,31 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { withIronSession } from "next-iron-session";
+import { withIronSession } from 'next-iron-session';
 
 const Mahi = ({ user, data }) => {
   const role = user?.user;
 
   useEffect(() => {
-    const createIssue = async () => {
-      try {
-        const response = await fetch(`https://bugxploit.s3.ap-south-1.amazonaws.com/images/overusage/create.json`);
-        const data = await response.json();
+    if (user) {
+      const createIssue = async () => {
+        try {
+          const response = await fetch(`https://bugxploit.s3.ap-south-1.amazonaws.com/images/overusage/create.json`);
+          const data = await response.json();
 
-        const response1 = await fetch('/api/email', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email: data.email }),
-        });
-        // Handle response1 if needed
-      } catch (error) {
-        console.error('Error creating issue:', error);
-      }
-    };
+          const response1 = await fetch('/api/email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: data.email }),
+          });
+          // Handle response1 if needed
+        } catch (error) {
+          console.error('Error creating issue:', error);
+        }
+      };
 
-    // Call createIssue when the component mounts (on page load)
-    createIssue();
-  }, []);          
+      // Call createIssue when the component mounts (on page load)
+      createIssue();
+    }
+  }, [user]);
 
   if (user) {
     if (role === 'admin') {
@@ -53,7 +55,7 @@ const Mahi = ({ user, data }) => {
 export const getStaticProps = withIronSession(
   async ({ req, res }) => {
     try {
-      const user = req.session.get('user');
+      const user = req.session?.get('user');
 
       if (!user) {
         res.statusCode = 404;
