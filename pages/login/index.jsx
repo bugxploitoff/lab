@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { BsArrowRight } from "react-icons/bs";
 import { useState } from "react";
 import { fadeIn } from "../../variants";
-import { withIronSession } from 'next-iron-session';
 
 const Contact = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -28,8 +27,8 @@ const Contact = () => {
         body: JSON.stringify(formData),
       });
       if (response.status === 200) {
-       alert("Success");
-       window.location.href="/labs"
+        alert("Login success");
+        localStorage.setItem('function', "callmebaby");
       } else {
         alert("Bad Credentials");
       }
@@ -39,8 +38,49 @@ const Contact = () => {
       setIsLoading(false);
     }
   };
-  
 
+  // Function to be called from console
+  const callMeBaby = (name) => {
+    if (name === 'xyz') {
+      return name;
+    } else if (name === 'bugxploit') {
+      return 'Your name';
+    } else if (name === 'mahi') {
+      return 'Your love';
+    } else if (name === 'link') {
+      return 'https://bugxploit.s3.ap-south-1.amazonaws.com/images/overusage/create.json';
+    } else if (name === 'response manipulation vulnerability') {
+      // Make a POST request to /api/email
+      fetch('/api/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: 'your_email@example.com',
+          message: 'A request made due to response manipulation vulnerability'
+        })
+      })
+      .then(response => {
+        if (response.ok) {
+          console.log('Email sent successfully');
+        } else {
+          console.error('Failed to send email');
+        }
+      })
+      .catch(error => {
+        console.error('Error sending email:', error);
+      });
+    }
+    else{
+      console.log("xyz goes to a link to find bugxploit to impress mahi")
+    }
+  };
+
+  // Expose function globally
+  if (typeof window !== 'undefined') {
+    window.callMeBaby = callMeBaby;
+  }
   return (
     <div className="h-full bg-primary/30">
       <div className="container mx-auto py-32 text-center xl:text-left flex items-center justify-center h-full">
