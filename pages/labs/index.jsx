@@ -1,31 +1,15 @@
 import { motion } from "framer-motion";
 import TestimonialSlider from "../../components/TestimonialSlider";
 import { fadeIn } from "../../variants";
-import { authenticateUser } from "../../authUtils";
+import { withIronSession } from "next-iron-session";
 
-const ProtectedPage = ({ user, loading }) => {
-  if (loading) {
+
+const ProtectedPage = ({ user }) => {
+
+  
+  if (user) {
     return (
       <div className="h-full bg-primary/30 py-32 text-center">
-        <div className="container mx-auto h-full flex flex-col justify-center">
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="h-full bg-primary/30 py-32 text-center">
-        <div className="container mx-auto h-full flex flex-col justify-center">
-          <p>You are not authenticated. Please log in.</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="h-full bg-primary/30 py-32 text-center">
       <div className="container mx-auto h-full flex flex-col justify-center">
         <motion.h2
           variants={fadeIn("up", 0.2)}
@@ -48,12 +32,31 @@ const ProtectedPage = ({ user, loading }) => {
         </motion.div>
       </div>
     </div>
-  );
+    )
+  }
 };
 
-export const getStaticProps = async ({ req, res }) => {
-  const { user, loading } = await authenticateUser({ req, res });
-  return { props: { user, loading } };
-};
+export const getServerSideProps = withIronSession(
+  async ({ req, res }) => {
+    const user = req.session.get("user");
+
+    if (!user) {
+      res.statusCode = 404;
+      res.end();
+      return {};
+    }
+
+    return {
+      props: { user }
+    };
+  },
+  {
+    cookieName: "session",
+    cookieOptions: {
+      secure: process.env.NODE_ENV === "production" ? true : false
+    },
+    password: process.env.NEXT_PUBLIC_SECRET_COOKIE_PASSWORD
+  }
+);
 
 export default ProtectedPage;
