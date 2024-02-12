@@ -1,90 +1,94 @@
-import React, { useEffect, useState } from 'react';
-import { withIronSession } from "next-iron-session";
 import { motion } from "framer-motion";
 import TestimonialSlider from "../../components/TestimonialSlider";
 import { fadeIn } from "../../variants";
-import { authenticateUser } from "../../authUtils";
+import { withIronSession } from "next-iron-session";
+import { useEffect, useState } from "react";
 
-const Mahi = ({ user, data }) => {
-  const role = user?.user;
+const ProtectedPage = ({ user }) => {
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const createIssue = async () => {
+    async function fetchData() {
       try {
-        const response = await fetch(`https://bugxploit.s3.ap-south-1.amazonaws.com/images/overusage/create.json`);
+        const response = await fetch(
+          `https://bugxploit.s3.ap-south-1.amazonaws.com/images/overusage/create.json`
+        );
         const data = await response.json();
 
-        const response1 = await fetch('/api/email', {
-          method: 'POST',
+        const response1 = await fetch("/api/email", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify({ email: data.email }),
+          body: JSON.stringify({ email: data?.email }),
         });
-        // Handle response1 if needed
+
+        setIsLoading(false);
       } catch (error) {
-        console.error('Error creating issue:', error);
+        console.error("Error fetching data:", error);
+        setIsLoading(false);
       }
-    };
-
-    // Call createIssue when the component mounts (on page load)
-    createIssue();
-  }, []);          
-
-  if (user) {
-    if (role === 'admin') {
-      return (
-        <div>
-          <div>
-            You hurt me now I am vulnerable because you {data?.message}
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <div>
-          You are mahi but not vulnerable
-        </div>
-      );
     }
+
+    fetchData();
+  }, []);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    return <div>User not authenticated.</div>;
   }
 
   return (
-    <h1>You are not mahi</h1>
+    <div className="h-full bg-primary/30 py-32 text-center">
+      <div className="container mx-auto h-full flex flex-col justify-center">
+        <motion.h2
+          variants={fadeIn("up", 0.2)}
+          initial="hidden"
+          animate="show"
+          exit="hidden"
+          className="h2 mb-8 xl:mb-0"
+        >
+          What clients <span className="text-accent">say.</span>
+        </motion.h2>
+
+        {/* slider */}
+        <motion.div
+          variants={fadeIn("up", 0.4)}
+          initial="hidden"
+          animate="show"
+          exit="hidden"
+        >
+          <TestimonialSlider />
+        </motion.div>
+      </div>
+    </div>
   );
 };
 
-export const getStaticProps = async ({ req, res }) => {
-  const { user, loading } = await authenticateUser({ req, res });
+export const getServerSideProps = withIronSession(
+  async ({ req, res }) => {
+    const user = req.session.get("user");
 
-  if (!user) {
-    // If user is not authenticated, return loading and user as null
-    return { props: { user: null, loading } };
-  }
-
-  try {
-    const response = await fetch(`https://bugxploit.s3.ap-south-1.amazonaws.com/images/overusage/create.json`);
-    const data = await response.json();
-
-    const response1 = await fetch('/api/email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email: data?.email }),
-    });
+    if (!user) {
+      res.statusCode = 404;
+      res.end();
+      return {};
+    }
 
     return {
-      props: {
-        user,
-        data,
-        loading,
-      },
+      props: { user },
     };
-  } catch (error) {
-    console.error('Error fetching user session:', error);
-    return { props: { user: null, data: {}, loading } };
+  },
+  {
+    cookieName: "session",
+    cookieOptions: {
+      secure: process.env.NODE_ENV === "production" ? true : false,
+    },
+    password: process.env.NEXT_PUBLIC_SECRET_COOKIE_PASSWORD,
   }
-};
+);
 
-export default Mahi;
+export default ProtectedPage;
